@@ -21,12 +21,13 @@ const API = "http://www.batdongsan.vn";
     return request.continue();
   });
   let allLinks = [];
-  const LOWERBOUND = 286;
-  const UPPERBOUND = 289;
+  const LOWERBOUND = 1;
+  const UPPERBOUND = 100;
   for (let i = LOWERBOUND; i <= UPPERBOUND; i++) {
     let links = await parserLinkInPage(i, page);
     allLinks = allLinks.concat(links);
   }
+  await page.setDefaultNavigationTimeout(0)
   let data = [];
   for (let i = 0; i < allLinks.length; i++) {
     console.log("Item:" + (i + 1));
@@ -46,6 +47,8 @@ const API = "http://www.batdongsan.vn";
   // }
   fs.writeFileSync("data.json", JSON.stringify(data), "utf-8");
   console.log("crawler completed !!!");
+
+  await browser.close();
 })();
 
 const parserLinkInPage = async (pagination, page) => {
@@ -78,7 +81,7 @@ const parserLinkInPage = async (pagination, page) => {
 
 const getContent = async (page, url) => {
   await page.goto(url);
-  if ((await page.$("body > pre")) !== null) {
+  if ((await page.$("body > pre")) === null) {
     await page.goto("http://www.batdongsan.vn/default.aspx?removedos=true");
     await page.goto(url);
   } else await page.goto(url);
